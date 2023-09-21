@@ -8,13 +8,14 @@ namespace FirstMultiplayer
     {
         public float speed = 10.0f;
         
-        public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
+        //public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
 
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
             {
                 RandomSpawn();
+                RequestPlayerColorServerRpc();
             }
         }
 
@@ -24,7 +25,12 @@ namespace FirstMultiplayer
             {
                 var randomPosition = GetRandomPositionOnPlane();
                 transform.position = randomPosition;
-                Position.Value = randomPosition;
+
+                
+                
+                // Renderer r = GetComponent<Renderer>();
+                // r.material.color = Random.ColorHSV();
+                //Position.Value = randomPosition;
             }
             else
             {
@@ -35,12 +41,19 @@ namespace FirstMultiplayer
         [ServerRpc]
         void SubmitPositionRequestServerRpc(ServerRpcParams rpcParams = default)
         {
-            Position.Value = GetRandomPositionOnPlane();
+            // Position.Value = GetRandomPositionOnPlane();
+            transform.position = GetRandomPositionOnPlane();
         }
 
         static Vector3 GetRandomPositionOnPlane()
         {
             return new Vector3(Random.Range(-3f, 3f),Random.Range(-3f, 3f), 0f);
+        }
+
+        [ServerRpc]
+        void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
+        {
+            SetPlayerColorClientRpc(Random.ColorHSV());
         }
 
         void Update()
@@ -54,14 +67,20 @@ namespace FirstMultiplayer
             }
 
             
-            transform.position = Position.Value;
+            // transform.position = Position.Value;
         }
 
         [ServerRpc]
         void MovePlayerServerRPC(float horizontal, float vertical)
         {
             transform.Translate(horizontal, vertical, 0);
-            Position.Value = transform.position;
+            // Position.Value = transform.position;
+        }
+
+        [ClientRpc]
+        void SetPlayerColorClientRpc(Color newColor)
+        {
+            GetComponent<Renderer>().material.color = newColor;
         }
     }
 }
