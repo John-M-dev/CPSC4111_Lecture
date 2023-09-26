@@ -1,21 +1,17 @@
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace FirstMultiplayer
 {
     public class Player : NetworkBehaviour
     {
+        public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
         public float speed = 10.0f;
-        
-        //public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
-
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
             {
                 RandomSpawn();
-                RequestPlayerColorServerRpc();
             }
         }
 
@@ -25,12 +21,7 @@ namespace FirstMultiplayer
             {
                 var randomPosition = GetRandomPositionOnPlane();
                 transform.position = randomPosition;
-
-                
-                
-                // Renderer r = GetComponent<Renderer>();
-                // r.material.color = Random.ColorHSV();
-                //Position.Value = randomPosition;
+                Position.Value = randomPosition;
             }
             else
             {
@@ -41,46 +32,34 @@ namespace FirstMultiplayer
         [ServerRpc]
         void SubmitPositionRequestServerRpc(ServerRpcParams rpcParams = default)
         {
-            // Position.Value = GetRandomPositionOnPlane();
-            transform.position = GetRandomPositionOnPlane();
+            Position.Value = GetRandomPositionOnPlane();
         }
 
         static Vector3 GetRandomPositionOnPlane()
         {
-            return new Vector3(Random.Range(-3f, 3f),Random.Range(-3f, 3f), 0f);
-        }
-
-        [ServerRpc]
-        void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
-        {
-            SetPlayerColorClientRpc(Random.ColorHSV());
+            return new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 1f );
         }
 
         void Update()
         {
-            if (IsOwner)
+
+            if(IsOwner)
             {
                 float horizontal = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
                 float vertical = Input.GetAxis("Vertical") * speed * Time.deltaTime;
-                
-                MovePlayerServerRPC(horizontal, vertical);
+
+                //transform.Translate(horizontal, vertical, 0);
+                MovePlayerServerRpc(horizontal, vertical);
             }
 
-            
-            // transform.position = Position.Value;
+            //transform.position = Position.Value;
         }
 
         [ServerRpc]
-        void MovePlayerServerRPC(float horizontal, float vertical)
+        void MovePlayerServerRpc(float horizontal, float vertical)
         {
             transform.Translate(horizontal, vertical, 0);
-            // Position.Value = transform.position;
-        }
-
-        [ClientRpc]
-        void SetPlayerColorClientRpc(Color newColor)
-        {
-            GetComponent<Renderer>().material.color = newColor;
+            //Position.Value = transform.position;
         }
     }
 }
