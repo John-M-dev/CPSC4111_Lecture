@@ -71,7 +71,7 @@ namespace FirstMultiplayer
         [ServerRpc]
         void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
         {
-            Color color = Random.ColorHSV();
+            Color color = Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 0.7f);
             gameObject.GetComponent<Renderer>().material.color = color;
             SetPlayerColorClientRpc(color);
         }
