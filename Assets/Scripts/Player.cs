@@ -16,9 +16,6 @@ namespace FirstMultiplayer
             {
                 RandomSpawn();
                 RequestPlayerColorServerRpc();
-            }
-            else
-            {
                 UpdatePlayerColorsServerRpc();
             }
         }
@@ -73,9 +70,10 @@ namespace FirstMultiplayer
         [ServerRpc]
         void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
         {
+            Debug.Log("Test");
             Color color = Random.ColorHSV();
             gameObject.GetComponent<Renderer>().material.color = color;
-            SetPlayerColorClientRpc(color);
+            // SetPlayerColorClientRpc(color);
         }
 
         void Update()
@@ -86,6 +84,7 @@ namespace FirstMultiplayer
                 float vertical = Input.GetAxis("Vertical") * speed * Time.deltaTime;
                 
                 MovePlayerServerRPC(horizontal, vertical);
+                Debug.Log("Position: " + this.transform.position);
             }
 
             
