@@ -48,14 +48,13 @@ namespace FirstMultiplayer
                 {
                     foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
                     {
-                        Player player = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid)
-                            .GetComponent<Player>();
+                        Player player = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>();
                         //NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().RandomSpawn();
                         player.RandomSpawn();
                         Color color = player.gameObject.GetComponent<Renderer>().material.color;
                         player.SetPlayerColorClientRpc(color);
                     }
-            }
+                }
                 else
                 {
                     var playerObject = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
