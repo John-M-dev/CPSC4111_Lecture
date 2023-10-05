@@ -26,7 +26,7 @@ namespace FirstMultiplayer
             //UpdatePlayerColorsServerRpc();
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         public void UpdatePlayerColorsServerRpc(ServerRpcParams rpcParams = default)
         {
             Color color = gameObject.GetComponent<Renderer>().material.color;
