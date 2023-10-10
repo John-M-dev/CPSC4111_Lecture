@@ -5,7 +5,6 @@ namespace FirstMultiplayer
 {
     public class Player : NetworkBehaviour
     {
-        //public NetworkVariable<Vector3> Position = new NetworkVariable<Vector3>();
         public float speed = 10.0f;
         public override void OnNetworkSpawn()
         {
@@ -13,7 +12,6 @@ namespace FirstMultiplayer
             {
                 RandomSpawn();
                 RequestPlayerColorServerRpc();
-                UpdatePlayerColorsServerRpc();
             }
             else
             {
@@ -23,26 +21,24 @@ namespace FirstMultiplayer
 
         public void Start()
         {
-            //UpdatePlayerColorsServerRpc();
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void UpdatePlayerColorsServerRpc(ServerRpcParams rpcParams = default)
         {
             Color color = gameObject.GetComponent<Renderer>().material.color;
-            SetPlayerColorClientRpc(color);
-            Debug.Log("Color: " + color);
-            /*
-            if (NetworkManager.Singleton.IsServer)
+           
+            // Debug.Log("Client ID: [0] " + clientId);
+            ClientRpcParams clientRpcParams = new ClientRpcParams
             {
-                foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+                Send = new ClientRpcSendParams
                 {
-                    Player player = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>();
-                    Color color = player.gameObject.GetComponent<Renderer>().material.color;
-                    player.SetPlayerColorClientRpc(color);
+                    TargetClientIds = new ulong[] { rpcParams.Receive.SenderClientId }
                 }
-            }
-            */
+            };
+            
+            SetPlayerColorClientRpc(color, clientRpcParams);
+            // Debug.Log("Color: " + color);
         }
 
             public void RandomSpawn()
@@ -51,10 +47,6 @@ namespace FirstMultiplayer
             {
                 var randomPosition = GetRandomPositionOnPlane();
                 transform.position = randomPosition;
-                //Position.Value = randomPosition;
-                //Renderer r = GetComponent<Renderer>();
-                //r.material.color = Random.ColorHSV();
-                
             }
             else
             {
@@ -65,7 +57,6 @@ namespace FirstMultiplayer
         [ServerRpc]
         void SubmitPositionRequestServerRpc(ServerRpcParams rpcParams = default)
         {
-            //Position.Value = GetRandomPositionOnPlane();
             transform.position = GetRandomPositionOnPlane();
         }
         [ServerRpc]
@@ -77,7 +68,7 @@ namespace FirstMultiplayer
         }
 
         [ClientRpc]
-        public void SetPlayerColorClientRpc(Color newColor)
+        public void SetPlayerColorClientRpc(Color newColor, ClientRpcParams clientRpcParams = default)
         {
             GetComponent<Renderer>().material.color = newColor;
         }
@@ -94,19 +85,15 @@ namespace FirstMultiplayer
             {
                 float horizontal = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
                 float vertical = Input.GetAxis("Vertical") * speed * Time.deltaTime;
-
-                //transform.Translate(horizontal, vertical, 0);
+                
                 MovePlayerServerRpc(horizontal, vertical);
             }
-
-            //transform.position = Position.Value;
         }
 
         [ServerRpc]
         void MovePlayerServerRpc(float horizontal, float vertical)
         {
             transform.Translate(horizontal, vertical, 0);
-            //Position.Value = transform.position;
         }
     }
 }
