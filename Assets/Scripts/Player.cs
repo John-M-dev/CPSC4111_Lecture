@@ -85,15 +85,35 @@ namespace FirstMultiplayer
             {
                 float horizontal = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
                 float vertical = Input.GetAxis("Vertical") * speed * Time.deltaTime;
-                
-                MovePlayerServerRpc(horizontal, vertical);
+
+                if (!Mathf.Approximately(0.0f, horizontal) || !Mathf.Approximately(0.0f, vertical))
+                {
+                    MovePlayerServerRpc(horizontal, vertical);    
+                }
             }
         }
 
         [ServerRpc]
-        void MovePlayerServerRpc(float horizontal, float vertical)
+        void MovePlayerServerRpc(float horizontal, float vertical, ServerRpcParams rpcParams = default)
         {
+            Vector3 oldPosition = transform.position;
             transform.Translate(horizontal, vertical, 0);
+            
+            foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
+            {
+                if (rpcParams.Receive.SenderClientId != uid)
+                {
+                    Player player = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>();
+                    float distance = Vector3.Distance(player.transform.position, transform.position);
+                    if (distance < 1.0f)
+                    {
+                        transform.position = oldPosition;
+                        // RequestPlayerColorServerRpc();
+                    }
+                }
+                
+                
+            }
         }
     }
 }
