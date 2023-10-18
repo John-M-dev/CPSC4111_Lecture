@@ -12,8 +12,8 @@ namespace FirstMultiplayer
             {
                 RandomSpawn();
                 RequestPlayerColorServerRpc();
-                Transform camera = GetComponent<CameraController>().player;
-                
+                CameraController cc = FindObjectOfType<CameraController>();
+                cc.player = transform;
             }
             else
             {
@@ -29,8 +29,8 @@ namespace FirstMultiplayer
         public void UpdatePlayerColorsServerRpc(ServerRpcParams rpcParams = default)
         {
             Color color = gameObject.GetComponent<Renderer>().material.color;
-           
-            // Debug.Log("Client ID: [0] " + clientId);
+            //ulong clientId = rpcParams.Receive.SenderClientId;
+            //Debug.Log("Client ID: " + rpcParams.Receive.SenderClientId);
             ClientRpcParams clientRpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -38,9 +38,8 @@ namespace FirstMultiplayer
                     TargetClientIds = new ulong[] { rpcParams.Receive.SenderClientId }
                 }
             };
-            
             SetPlayerColorClientRpc(color, clientRpcParams);
-            // Debug.Log("Color: " + color);
+            //Debug.Log("Color: " + color);
         }
 
             public void RandomSpawn()
@@ -88,9 +87,9 @@ namespace FirstMultiplayer
                 float horizontal = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
                 float vertical = Input.GetAxis("Vertical") * speed * Time.deltaTime;
 
-                if (!Mathf.Approximately(0.0f, horizontal) || !Mathf.Approximately(0.0f, vertical))
+                if(!Mathf.Approximately(horizontal, 0.0f) || !Mathf.Approximately(vertical, 0.0f))
                 {
-                    MovePlayerServerRpc(horizontal, vertical);    
+                    MovePlayerServerRpc(horizontal, vertical);
                 }
             }
         }
@@ -100,23 +99,24 @@ namespace FirstMultiplayer
         {
             Vector3 oldPosition = transform.position;
             transform.Translate(horizontal, vertical, 0);
-            
             foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds)
             {
-                if (rpcParams.Receive.SenderClientId != uid)
+                if (uid != rpcParams.Receive.SenderClientId)
                 {
                     Player player = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>();
                     float distance = Vector3.Distance(player.transform.position, transform.position);
-                    if (distance < 1.0f)
+                    if(distance < 1f)
                     {
                         Vector3 correctionVector = (1 - distance) * (oldPosition - transform.position).normalized;
                         transform.position += correctionVector;
                         //transform.position = oldPosition;
-                        // RequestPlayerColorServerRpc();
+                        //RequestPlayerColorServerRpc();
                     }
                 }
-                
-                
+                //else
+                //{
+                //    Debug.Log("Checking against self not allowed!");
+                //}
             }
         }
     }
