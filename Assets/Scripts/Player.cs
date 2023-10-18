@@ -12,6 +12,8 @@ namespace FirstMultiplayer
             {
                 RandomSpawn();
                 RequestPlayerColorServerRpc();
+                Transform camera = GetComponent<CameraController>().player;
+                
             }
             else
             {
@@ -107,7 +109,9 @@ namespace FirstMultiplayer
                     float distance = Vector3.Distance(player.transform.position, transform.position);
                     if (distance < 1.0f)
                     {
-                        transform.position = oldPosition;
+                        Vector3 correctionVector = (1 - distance) * (oldPosition - transform.position).normalized;
+                        transform.position += correctionVector;
+                        //transform.position = oldPosition;
                         // RequestPlayerColorServerRpc();
                     }
                 }
