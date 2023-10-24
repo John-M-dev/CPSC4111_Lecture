@@ -10,7 +10,7 @@ namespace FirstMultiplayer
         {
             if (IsOwner)
             {
-                RandomSpawn();
+                SubmitPositionRequestServerRpc();
                 RequestPlayerColorServerRpc();
                 CameraController cc = FindObjectOfType<CameraController>();
                 cc.player = transform;
@@ -29,8 +29,6 @@ namespace FirstMultiplayer
         public void UpdatePlayerColorsServerRpc(ServerRpcParams rpcParams = default)
         {
             Color color = gameObject.GetComponent<Renderer>().material.color;
-            //ulong clientId = rpcParams.Receive.SenderClientId;
-            //Debug.Log("Client ID: " + rpcParams.Receive.SenderClientId);
             ClientRpcParams clientRpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -39,20 +37,20 @@ namespace FirstMultiplayer
                 }
             };
             SetPlayerColorClientRpc(color, clientRpcParams);
-            //Debug.Log("Color: " + color);
         }
 
             public void RandomSpawn()
         {
-            if (NetworkManager.Singleton.IsServer)
-            {
-                var randomPosition = GetRandomPositionOnPlane();
-                transform.position = randomPosition;
-            }
-            else
-            {
-                SubmitPositionRequestServerRpc();
-            }
+            SubmitPositionRequestServerRpc();
+            // if (NetworkManager.Singleton.IsServer)
+            // {
+            //     var randomPosition = GetRandomPositionOnPlane();
+            //     transform.position = randomPosition;
+            // }
+            // else
+            // {
+            //     SubmitPositionRequestServerRpc();
+            // }
         }
 
         [ServerRpc]
@@ -63,7 +61,7 @@ namespace FirstMultiplayer
         [ServerRpc]
         void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
         {
-            Color color = Random.ColorHSV();
+            Color color = GameManager.RequestNextColor();
             gameObject.GetComponent<Renderer>().material.color = color;
             SetPlayerColorClientRpc(color);
         }

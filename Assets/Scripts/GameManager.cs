@@ -6,6 +6,7 @@ namespace FirstMultiplayer
 {
     public class GameManager : MonoBehaviour
     {
+        public static IColorStrategy ColorStrategy = new PreselectedColors();
         void OnGUI()
         {
             GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -62,6 +63,13 @@ namespace FirstMultiplayer
                     player.RandomSpawn();
                 }
             }
+        }
+
+        public static Color RequestNextColor()
+        {
+            Color assignedColor = ColorStrategy.SelectColor();
+
+            return assignedColor;
         }
     }
 }
