@@ -10,6 +10,7 @@ namespace FirstMultiplayer
         {
             if (IsOwner)
             {
+                //RandomSpawn();
                 SubmitPositionRequestServerRpc();
                 RequestPlayerColorServerRpc();
                 CameraController cc = FindObjectOfType<CameraController>();
@@ -39,18 +40,18 @@ namespace FirstMultiplayer
             SetPlayerColorClientRpc(color, clientRpcParams);
         }
 
-            public void RandomSpawn()
+        public void RandomSpawn()
         {
             SubmitPositionRequestServerRpc();
-            // if (NetworkManager.Singleton.IsServer)
-            // {
-            //     var randomPosition = GetRandomPositionOnPlane();
-            //     transform.position = randomPosition;
-            // }
-            // else
-            // {
-            //     SubmitPositionRequestServerRpc();
-            // }
+            /*if (NetworkManager.Singleton.IsServer)
+            {
+                var randomPosition = GetRandomPositionOnPlane();
+                transform.position = randomPosition;
+            }
+            else
+            {
+                SubmitPositionRequestServerRpc();
+            }*/
         }
 
         [ServerRpc]
@@ -61,7 +62,7 @@ namespace FirstMultiplayer
         [ServerRpc]
         void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
         {
-            Color color = GameManager.RequestNextColor();
+            Color color = GameManager.RequestNextColor();//Random.ColorHSV();
             gameObject.GetComponent<Renderer>().material.color = color;
             SetPlayerColorClientRpc(color);
         }

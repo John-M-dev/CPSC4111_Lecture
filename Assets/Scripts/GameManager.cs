@@ -6,7 +6,21 @@ namespace FirstMultiplayer
 {
     public class GameManager : MonoBehaviour
     {
-        public static IColorStrategy ColorStrategy = new PreselectedColors();
+        public Color[] colors;
+        public float[] hues;
+        public static IColorStrategy colorStrategy = new AstreaChoices();
+
+        private void Awake()
+        {
+            AstreaChoices ac = new AstreaChoices();
+            colors = new Color[20];
+            hues = new float[20];
+            for(int i = 0; i < 20; i++)
+            {
+                colors[i] = ac.SelectColor();
+                hues[i] = ac.Hue(i+1);
+            }
+        }
         void OnGUI()
         {
             GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -67,7 +81,7 @@ namespace FirstMultiplayer
 
         public static Color RequestNextColor()
         {
-            Color assignedColor = ColorStrategy.SelectColor();
+            Color assignedColor = colorStrategy.SelectColor();
 
             return assignedColor;
         }
