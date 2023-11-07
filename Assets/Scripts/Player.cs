@@ -17,11 +17,13 @@ namespace FirstMultiplayer
                 RequestPlayerColorServerRpc();
                 CameraController cc = FindObjectOfType<CameraController>();
                 cc.player = transform;
-                gamerTag.text = GameManager.inputGamerTag.text;
+                // gamerTag.text = GameManager.inputGamerTag.text;
+                SetPlayerGamerTagServerRpc(GameManager.inputGamerTag.text);
             }
             else
             {
                 UpdatePlayerColorsServerRpc();
+                UpdatePlayerNameServerRpc();
             }
         }
 
@@ -62,6 +64,34 @@ namespace FirstMultiplayer
         {
             transform.position = GetRandomPositionOnPlane();
         }
+
+        [ServerRpc]
+        void SetPlayerGamerTagServerRpc(string gamertag, ServerRpcParams rpcParams = default)
+        {
+            
+            SetPlayerGamerTagClientRpc(gamertag);
+        }
+
+        [ClientRpc]
+        public void SetPlayerGamerTagClientRpc(string gamertag, ClientRpcParams rpcParams = default)
+        {
+            gamerTag.text = gamertag;
+        }
+        
+        [ServerRpc(RequireOwnership = false)]
+        public void UpdatePlayerNameServerRpc(ServerRpcParams rpcParams = default)
+        {
+            string oldGamerTag = gamerTag.text;
+            ClientRpcParams clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new ulong[] { rpcParams.Receive.SenderClientId }
+                }
+            };
+            SetPlayerGamerTagClientRpc(oldGamerTag, clientRpcParams);
+        }
+        
         [ServerRpc]
         void RequestPlayerColorServerRpc(ServerRpcParams rpcParams = default)
         {
