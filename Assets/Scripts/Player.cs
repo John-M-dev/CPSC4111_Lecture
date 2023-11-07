@@ -1,11 +1,13 @@
 using Unity.Netcode;
 using UnityEngine;
+using TMPro;
 
 namespace FirstMultiplayer
 {
     public class Player : NetworkBehaviour
     {
         public float speed = 10.0f;
+        public TMPro.TextMeshProUGUI gamerTag;
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
@@ -15,6 +17,7 @@ namespace FirstMultiplayer
                 RequestPlayerColorServerRpc();
                 CameraController cc = FindObjectOfType<CameraController>();
                 cc.player = transform;
+                gamerTag.text = GameManager.inputGamerTag.text;
             }
             else
             {

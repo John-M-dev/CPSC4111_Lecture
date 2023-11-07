@@ -1,6 +1,7 @@
 
 using Unity.Netcode;
 using UnityEngine;
+using TMPro;
 
 namespace FirstMultiplayer
 {
@@ -9,6 +10,8 @@ namespace FirstMultiplayer
         public Color[] colors;
         public float[] hues;
         public static IColorStrategy colorStrategy = new AstreaChoices();
+        public static TMPro.TextMeshProUGUI inputGamerTag;
+        public TMPro.TextMeshProUGUI inputLocalGamerTag;
 
         private void Awake()
         {
@@ -20,6 +23,7 @@ namespace FirstMultiplayer
                 colors[i] = ac.SelectColor();
                 hues[i] = ac.Hue(i+1);
             }
+            inputGamerTag = inputLocalGamerTag;
         }
         void OnGUI()
         {
