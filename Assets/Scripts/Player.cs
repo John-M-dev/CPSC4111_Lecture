@@ -1,13 +1,67 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 using TMPro;
+using Random = UnityEngine.Random;
 
 namespace FirstMultiplayer
 {
+    public class Token
+    {
+        public Token()
+        {
+            
+        }
+    }
     public class Player : NetworkBehaviour
     {
         public float speed = 10.0f;
         public TMPro.TextMeshProUGUI gamerTag;
+        private Token _token;
+        private Color _originalColor;
+        private Token Token
+        {
+            set
+            {
+                _token = value;
+                if (_token == null)
+                {
+                    SetPlayerColorClientRpc(_originalColor);
+                }
+                else
+                {
+                    
+                    _originalColor = GetComponent<Renderer>().material.color;
+                    SetPlayerColorClientRpc(Color.white);
+                }
+            }
+        }
+        public bool Tagged
+        {
+            get { return _token != null; }
+        }
+
+        public void Receive(Token token)
+        {
+            // _token = token;
+            Token = token;
+        }
+
+        public Token Remove()
+        {
+            Token oldToken = _token;
+            // _token = null;
+            Token = null;
+            return oldToken;
+        }
+
+        public void TransferTokenTo(Player otherPlayer)
+        {
+            if (_token != null)
+            {
+                otherPlayer.Receive(Remove());
+            }
+        }
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
@@ -27,6 +81,14 @@ namespace FirstMultiplayer
             }
         }
 
+        [ServerRpc]
+        public void RequestTokenServerRpc(ServerRpcParams rpcParams = default)
+        {
+            Token token = GameManager.RequestToken();
+            
+            Receive(token);
+        }
+        
         public void Start()
         {
         }
@@ -97,6 +159,7 @@ namespace FirstMultiplayer
         {
             Color color = GameManager.RequestNextColor();//Random.ColorHSV();
             gameObject.GetComponent<Renderer>().material.color = color;
+            RequestTokenServerRpc();
             SetPlayerColorClientRpc(color);
         }
 
@@ -141,6 +204,17 @@ namespace FirstMultiplayer
                     {
                         Vector3 correctionVector = (1 - distance) * (oldPosition - transform.position).normalized;
                         transform.position += correctionVector;
+                        if (Tagged)
+                        {
+                            TransferTokenTo(player);
+                        }
+                        else
+                        {
+                            if (player.Tagged)
+                            {
+                                player.TransferTokenTo(this);
+                            }
+                        }
                         //transform.position = oldPosition;
                         //RequestPlayerColorServerRpc();
                     }

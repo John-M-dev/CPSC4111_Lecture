@@ -12,6 +12,7 @@ namespace FirstMultiplayer
         public static IColorStrategy colorStrategy = new AstreaChoices();
         public static TMPro.TextMeshProUGUI inputGamerTag;
         public TMPro.TextMeshProUGUI inputLocalGamerTag;
+        public static Token theToken = new Token();
 
         private void Awake()
         {
@@ -42,6 +43,13 @@ namespace FirstMultiplayer
             GUILayout.EndArea();
         }
 
+        public static Token RequestToken()
+        {
+            Token oldToken = theToken;
+            theToken = null;
+            return oldToken;
+        }
+        
         static void StartButtons()
         {
             if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
